@@ -47,6 +47,8 @@ namespace DataAccess.EntityFramework
             return await Context.Database.ExecuteSqlInterpolatedAsync(interpolatedQueryString);
         }
 
+        #region [ Get ]
+
         public TEntity Get(Expression<Func<TEntity, bool>> expression)
         {
             return Context.Set<TEntity>()
@@ -90,6 +92,27 @@ namespace DataAccess.EntityFramework
 
             return await Context.Set<TEntity>().CountAsync(expression);
         }
+
+        #endregion
+
+        #region [ Any ]
+
+        public bool Any()
+        {
+            IQueryable<TEntity> baseQuery = GetBaseQuery();
+
+            return baseQuery.Any();
+        }
+
+        public bool Any(Expression<Func<TEntity, bool>> expression)
+        {
+            IQueryable<TEntity> baseQuery = GetBaseQuery(expression);
+            return baseQuery.Any();
+        }
+
+        #endregion
+
+        #region [ GetList ]
 
         public IEnumerable<TEntity> GetList()
         {
@@ -151,6 +174,8 @@ namespace DataAccess.EntityFramework
             return new PagedListResult<TEntity>(list.ToList(), pageNumber, pageSize, totalPageCount, totalRecordCount);
         }
 
+        #endregion
+
         public Result InTransaction(Func<Result> transaction, Action? successAction, Action<Exception>? exceptionAction)
         {
             Result? result = default(Result);
@@ -181,6 +206,8 @@ namespace DataAccess.EntityFramework
             }
         }
 
+        #region [ BaseQuery ]
+
         public IQueryable<TEntity> GetBaseQuery(bool noTracking = true)
         {
             IQueryable<TEntity> baseQuery = Context.Set<TEntity>();
@@ -194,6 +221,26 @@ namespace DataAccess.EntityFramework
             return baseQuery;
         }
 
+        public IQueryable<TEntity> GetBaseQuery(Expression<Func<TEntity, bool>> expression, bool noTracking = true)
+        {
+            IQueryable<TEntity> baseQuery = Context.Set<TEntity>();
+
+            if (IncludeProperties != null && IncludeProperties.Length > 0)
+                baseQuery = baseQuery.IncludeMultiple(IncludeProperties);
+
+            if (expression != null)
+                baseQuery = baseQuery.Where(expression);
+
+            if (noTracking)
+                baseQuery = baseQuery.AsNoTracking();
+
+            return baseQuery;
+        }
+
+        #endregion
+
+        #region [ Commit ]
+
         public int Commit()
         {
             return Context.SaveChanges();
@@ -203,6 +250,10 @@ namespace DataAccess.EntityFramework
         {
             return Context.SaveChangesAsync();
         }
+
+        #endregion
+
+        #region [ IDisposable ]
 
         protected virtual void Dispose(bool disposing)
         {
@@ -221,5 +272,8 @@ namespace DataAccess.EntityFramework
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        #endregion
+
     }
 }
