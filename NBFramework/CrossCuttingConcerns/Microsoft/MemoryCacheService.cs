@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using NbFramework.Utilities.IoC;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace NbFramework.CrossCuttingConcerns.Microsoft
@@ -41,18 +42,18 @@ namespace NbFramework.CrossCuttingConcerns.Microsoft
 
         public void RemoveByPattern(string pattern)
         {
-            var cacheEntriesCollectionDefinition = typeof(MemoryCache).GetProperty("EntriesCollection", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var cacheEntriesCollection = cacheEntriesCollectionDefinition.GetValue(Cache) as dynamic;
+            PropertyInfo cacheEntriesCollectionDefinition = typeof(MemoryCache).GetProperty("EntriesCollection", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            dynamic cacheEntriesCollection = cacheEntriesCollectionDefinition.GetValue(Cache) as dynamic;
             List<ICacheEntry> cacheCollectionValues = new List<ICacheEntry>();
 
-            foreach (var cacheItem in cacheEntriesCollection)
+            foreach (dynamic cacheItem in cacheEntriesCollection)
             {
                 ICacheEntry cacheItemValue = cacheItem.GetType().GetProperty("Value").GetValue(cacheItem, null);
                 cacheCollectionValues.Add(cacheItemValue);
             }
 
-            var regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var keysToRemove = cacheCollectionValues.Where(d => regex.IsMatch(d.Key.ToString())).Select(d => d.Key).ToList();
+            Regex regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            List<object> keysToRemove = cacheCollectionValues.Where(d => regex.IsMatch(d.Key.ToString())).Select(d => d.Key).ToList();
 
             foreach (var key in keysToRemove)
             {
