@@ -1,4 +1,4 @@
-﻿namespace DataAccess
+﻿namespace NbFramework.DataAccess
 {
     public interface IEntity
     {

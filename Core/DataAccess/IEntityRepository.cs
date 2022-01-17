@@ -1,7 +1,7 @@
 ﻿using Core.Utilities.Results;
 using System.Linq.Expressions;
 
-namespace DataAccess
+namespace NbFramework.DataAccess
 {
     public interface IEntityRepository<T> where T : class, IEntity, new()
     {

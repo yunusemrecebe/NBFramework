@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Linq.Expressions;
 
-namespace DataAccess.EntityFramework
+namespace NbFramework.DataAccess.EntityFramework
 {
     public class EfEntityRepositoryBase<TEntity, TContext> : IEntityRepository<TEntity>, IDisposable
         where TEntity : class, IEntity, new()
